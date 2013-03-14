@@ -1,0 +1,14 @@
+{
+  "name": "prayer-times",
+  "version": "0.1.0",
+  "description": "PrayerTimes is a Node.JS module which is a port of the original JavaScript library, 'PrayTimes.js' developed by Hamid Zarrabi-Zadeh <http://praytimes.org/> providing a set of handy functions to calculate prayer times for any location around the world, based on a variety of calculation methods currently used in Muslim communities",
+  "main": "index.js",
+  "repository": "https://github.com/elwafdy/prayer-times",
+  "author": "Hamid Zarrabi-Zadeh",
+  "editor": "Ali El-Wafdy",
+  "license": "GNU LGPL v3.0",
+  "readmeFilename": "README.md",
+  "scripts": {
+    "test": "getTimes(new Date(), [30.01, 31.14], +2)"
+  }
+}
