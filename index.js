@@ -1,6 +1,8 @@
-var PrayerTimes = function() {
+var PrayerTimes = (function() {
+    
+    var PrayerTimes = {};
 
-  var DMath = require('./dmath');
+	var DMath = require('./dmath');
 
 	var timeNames = {
 		imsak    : 'Imsak',
@@ -83,7 +85,7 @@ var PrayerTimes = function() {
 	//----------------------- Public Functions ------------------------
 	
 	// set calculation method 
-	PrayerTimes.prototype.setMethod = function(method) {
+	PrayerTimes.setMethod = function(method) {
 		if (methods[method]) {
 			this.adjust(methods[method].params);
 			calcMethod = method;
@@ -91,31 +93,31 @@ var PrayerTimes = function() {
 	};
 
 	// set calculating parameters
-	PrayerTimes.prototype.adjust = function(params) {
+	PrayerTimes.adjust = function(params) {
 		for (var id in params)
 			setting[id] = params[id];
 	};
 
 	// set time offsets
-	PrayerTimes.prototype.tune = function(timeOffsets) {
+	PrayerTimes.tune = function(timeOffsets) {
 		for (var i in timeOffsets)
 			offset[i] = timeOffsets[i];
 	};
 
 	// get current calculation method
-	PrayerTimes.prototype.getMethod = function() { return calcMethod; };
+	PrayerTimes.getMethod = function() { return calcMethod; };
 
 	// get current setting
-	PrayerTimes.prototype.getSetting = function() { return setting; };
+	PrayerTimes.getSetting = function() { return setting; };
 
 	// get current time offsets
-	PrayerTimes.prototype.getOffsets = function() { return offset; };
+	PrayerTimes.getOffsets = function() { return offset; };
 
 	// get default calc parametrs
-	PrayerTimes.prototype.getDefaults = function() { return methods; };
+	PrayerTimes.getDefaults = function() { return methods; };
 
 	// return prayer times for a given date
-	PrayerTimes.prototype.getTimes = function(date, coords, timezone, dst, format) {
+	PrayerTimes.getTimes = function(date, coords, timezone, dst, format) {
 		lat = 1* coords[0];
 		lng = 1* coords[1]; 
 		elv = coords[2] ? 1* coords[2] : 0;
@@ -134,7 +136,7 @@ var PrayerTimes = function() {
 
 
 	// convert float time to the given format (see timeFormats)
-	PrayerTimes.prototype.getFormattedTime = function(time, format, suffixes) {
+	PrayerTimes.getFormattedTime = function(time, format, suffixes) {
 		if (isNaN(time))
 			return invalidTime;
 		if (format == 'Float') return time;
@@ -151,14 +153,14 @@ var PrayerTimes = function() {
 	//---------------------- Calculation Functions -----------------------
 
 	// compute mid-day time
-	PrayerTimes.prototype.midDay = function(time) {
+	PrayerTimes.midDay = function(time) {
 		var eqt = this.sunPosition(jDate+ time).equation;
 		var noon = DMath.fixHour(12- eqt);
 		return noon;
 	};
 
 	// compute the time at which sun reaches a specific angle below horizon
-	PrayerTimes.prototype.sunAngleTime = function(angle, time, direction) {
+	PrayerTimes.sunAngleTime = function(angle, time, direction) {
 		var decl = this.sunPosition(jDate+ time).declination;
 		var noon = this.midDay(time);
 		var t = 1/15* DMath.arccos((-DMath.sin(angle)- DMath.sin(decl)* DMath.sin(lat))/ 
@@ -167,7 +169,7 @@ var PrayerTimes = function() {
 	};
 
 	// compute asr time 
-	PrayerTimes.prototype.asrTime = function(factor, time) { 
+	PrayerTimes.asrTime = function(factor, time) { 
 		var decl = this.sunPosition(jDate+ time).declination;
 		var angle = -DMath.arccot(factor+ DMath.tan(Math.abs(lat- decl)));
 		return this.sunAngleTime(angle, time);
@@ -176,7 +178,7 @@ var PrayerTimes = function() {
 
 	// compute declination angle of sun and equation of time
 	// Ref: http://aa.usno.navy.mil/faq/docs/SunApprox.php
-	PrayerTimes.prototype.sunPosition = function(jd) {
+	PrayerTimes.sunPosition = function(jd) {
 		var D = jd - 2451545.0;
 		var g = DMath.fixAngle(357.529 + 0.98560028* D);
 		var q = DMath.fixAngle(280.459 + 0.98564736* D);
@@ -194,7 +196,7 @@ var PrayerTimes = function() {
 
 	// convert Gregorian date to Julian day
 	// Ref: Astronomical Algorithms by Jean Meeus
-	PrayerTimes.prototype.julian = function(year, month, day) {
+	PrayerTimes.julian = function(year, month, day) {
 		if (month <= 2) {
 			year -= 1;
 			month += 12;
@@ -210,7 +212,7 @@ var PrayerTimes = function() {
 	//---------------------- Compute Prayer Times -----------------------
 
 	// compute prayer times at given julian date
-	PrayerTimes.prototype.computePrayerTimes = function(times) {
+	PrayerTimes.computePrayerTimes = function(times) {
 		times = this.dayPortion(times);
 		var params  = setting;
 		
@@ -230,7 +232,7 @@ var PrayerTimes = function() {
 	};
 
 	// compute prayer times 
-	PrayerTimes.prototype.computeTimes = function() {
+	PrayerTimes.computeTimes = function() {
 		// default times
 		var times = { 
 			imsak: 5, fajr: 5, sunrise: 6, dhuhr: 12, 
@@ -253,7 +255,7 @@ var PrayerTimes = function() {
 	};
 
 	// adjust times 
-	PrayerTimes.prototype.adjustTimes = function(times) {
+	PrayerTimes.adjustTimes = function(times) {
 		var params = setting;
 		for (var i in times)
 			times[i] += timeZone- lng/ 15;
@@ -273,13 +275,13 @@ var PrayerTimes = function() {
 	};
 
 	// get asr shadow factor
-	PrayerTimes.prototype.asrFactor = function(asrParam) {
+	PrayerTimes.asrFactor = function(asrParam) {
 		var factor = {Standard: 1, Hanafi: 2}[asrParam];
 		return factor || this.eval(asrParam);
 	};
 
 	// return sun angle for sunset/sunrise
-	PrayerTimes.prototype.riseSetAngle = function() {
+	PrayerTimes.riseSetAngle = function() {
 		//var earthRad = 6371009; // in meters
 		//var angle = DMath.arccos(earthRad/(earthRad+ elv));
 		var angle = 0.0347* Math.sqrt(elv); // an approximation
@@ -287,7 +289,7 @@ var PrayerTimes = function() {
 	};
 
 	// apply offsets to the times
-	PrayerTimes.prototype.tuneTimes = function(times) {
+	PrayerTimes.tuneTimes = function(times) {
 		for (var i in times)
 			times[i] += offset[i]/ 60; 
 		return times;
@@ -295,7 +297,7 @@ var PrayerTimes = function() {
 
 
 	// convert times to given time format
-	PrayerTimes.prototype.modifyFormats = function(times) {
+	PrayerTimes.modifyFormats = function(times) {
 		for (var i in times)
 			times[i] = this.getFormattedTime(times[i], timeFormat); 
 		return times;
@@ -303,7 +305,7 @@ var PrayerTimes = function() {
 
 
 	// adjust times for locations in higher latitudes
-	PrayerTimes.prototype.adjustHighLats = function(times) {
+	PrayerTimes.adjustHighLats = function(times) {
 		var params = setting;
 		var nightTime = this.timeDiff(times.sunset, times.sunrise); 
 
@@ -316,7 +318,7 @@ var PrayerTimes = function() {
 	};
 	
 	// adjust a time for higher latitudes
-	PrayerTimes.prototype.adjustHLTime = function(time, base, angle, night, direction) {
+	PrayerTimes.adjustHLTime = function(time, base, angle, night, direction) {
 		var portion = this.nightPortion(angle, night);
 		var timeDiff = (direction == 'ccw') ? 
 			this.timeDiff(time, base):
@@ -328,7 +330,7 @@ var PrayerTimes = function() {
 
 	
 	// the night portion used for adjusting times in higher latitudes
-	PrayerTimes.prototype.nightPortion = function(angle, night) {
+	PrayerTimes.nightPortion = function(angle, night) {
 		var method = setting.highLats;
 		var portion = 1/2 // MidNight
 		if (method == 'AngleBased')
@@ -339,7 +341,7 @@ var PrayerTimes = function() {
 	};
 
 	// convert hours to day portions 
-	PrayerTimes.prototype.dayPortion = function(times) {
+	PrayerTimes.dayPortion = function(times) {
 		for (var i in times)
 			times[i] /= 24;
 		return times;
@@ -349,7 +351,7 @@ var PrayerTimes = function() {
 	//---------------------- Time Zone Functions -----------------------
 
 	// get local time zone
-	PrayerTimes.prototype.getTimeZone = function(date) {
+	PrayerTimes.getTimeZone = function(date) {
 		var year = date[0];
 		var t1 = this.gmtOffset([year, 0, 1]);
 		var t2 = this.gmtOffset([year, 6, 1]);
@@ -358,13 +360,13 @@ var PrayerTimes = function() {
 
 	
 	// get daylight saving for a given date
-	PrayerTimes.prototype.getDst = function(date) {
+	PrayerTimes.getDst = function(date) {
 		return 1* (this.gmtOffset(date) != this.getTimeZone(date));
 	};
 
 
 	// GMT offset for a given date
-	PrayerTimes.prototype.gmtOffset = function(date) {
+	PrayerTimes.gmtOffset = function(date) {
 		var localDate = new Date(date[0], date[1]- 1, date[2], 12, 0, 0, 0);
 		var GMTString = localDate.toGMTString();
 		var GMTDate = new Date(GMTString.substring(0, GMTString.lastIndexOf(' ')- 1));
@@ -376,27 +378,29 @@ var PrayerTimes = function() {
 	//---------------------- Misc Functions -----------------------
 
 	// convert given string into a number
-	PrayerTimes.prototype.eval = function(str) {
+	PrayerTimes.eval = function(str) {
 		return 1* (str+ '').split(/[^0-9.+-]/)[0];
 	};
 
 
 	// detect if input contains 'min'
-	PrayerTimes.prototype.isMin = function(arg) {
+	PrayerTimes.isMin = function(arg) {
 		return (arg+ '').indexOf('min') != -1;
 	};
 
 
 	// compute the difference between two times 
-	PrayerTimes.prototype.timeDiff = function(time1, time2) {
+	PrayerTimes.timeDiff = function(time1, time2) {
 		return DMath.fixHour(time2- time1);
 	};
 
 
 	// add a leading 0 if necessary
-	PrayerTimes.prototype.twoDigitsFormat = function(num) {
+	PrayerTimes.twoDigitsFormat = function(num) {
 		return (num <10) ? '0'+ num : num;
 	};
-};
+    
+    return PrayerTimes;
+}());
 
 module.exports = PrayerTimes;
